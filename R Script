@@ -1,0 +1,480 @@
+###   BIO252 Coursework -- Data Analysis Assignment -- R codes	 (04/08/2023) ###
+###
+###   Title: 'An Analytical Report on the changes in Fruit-feeding Butterfly biodiversity across an elevation gradient across The Atlantic Forest
+###   & Cerrado Regions'                     
+###
+###   Author: Rachel Charlwood (2120525)								  
+###													  
+###   Date: 04/08/2023					# --> insert the date you hand in your report
+###													  
+###   R codes associated with "BIO252 CW1 Resit pdf" # --> (Name of the file of your report)				  
+###													  
+###   Version 4.2.3 (2023-03-15)
+
+##########################################################################################################################################################
+##########################################################################################################################################################
+
+###     1. Data used  
+
+###     2. Data management & Preparation 
+###     Content - organise script into these sections:											  	  
+###													  
+### 	1. Data used		# --> (provide links and brief explanation)								          
+###												                                                                                               
+###	2. Data management & preparation		# --> (use the codes I provide below - select only those for the dataset you will be using, of course!)						  
+###													    												  
+### 	3. Exploratory analysis			    # remember, this part is for you to explore the data and make sure you understand the data and set up the correct model	 						  
+###												                                                                                               
+###	4. Statistical analysis						# remember, the results from this part if what goes into the Results section of the report				  
+###													  
+###	5. R codes for figures in the report		## --> (i.e. the codes used to generate the specific figures included in your report)	
+
+#######################################################
+# 1. Data Used in Report
+#######################################################
+
+# Data has been obtained from: ATLANTIC: Data Papers from a biodiversity hotspot
+# URL: https://esajournals.onlinelibrary.wiley.com/doi/toc/10.1002/(ISSN)1939-9170.AtlanticPapers 
+
+# Selected dataset -> Antlantic Butterfly Data
+# dos Santos et al. (2018) Atlantic butterflies: a Dataset of fruit-feeding butterfly communities from the Atlantic forests. Ecology (in press)
+# DOI: https://doi.org/10.1002/ecy.2507
+
+# Data files: ATLANTIC_BUTTERFLIES_sites.csv & ATLANTIC_BUTTERFLIES_species.csv
+# Metadata description: ecy2507-sup-0002-metadatas1.pdf
+# Date last accessed: 04/08/2023
+
+#######################################################
+# 2. Data Management & Preparation 
+#######################################################
+
+species <- read.csv("ATLANTIC_BUTTERFLIES_species.csv", sep = ";", stringsAsFactors = TRUE)
+sites <- read.csv("ATLANTIC_BUTTERFLIES_sites.csv", sep = ";", stringsAsFactors = TRUE)
+
+### the 'species' data frame contains information on each species recorded at each site  ###
+### the 'sites' data frame contains information about each site where butterflies were recorded  ###
+
+str(species)
+ 'data.frame':	7062 obs. of  16 variables:
+   sites_ID       : Factor w/ 122 levels "bor1001","bor1002",..: 48 48 48 48 48 48 48 48 48 48 ...
+ Class          : Factor w/ 1 level "Insecta": 1 1 1 1 1 1 1 1 1 1 ...
+ Order          : Factor w/ 1 level "Lepidoptera": 1 1 1 1 1 1 1 1 1 1 ...
+ Family         : Factor w/ 1 level "Nymphalidae": 1 1 1 1 1 1 1 1 1 1 ...
+ Subfamily      : Factor w/ 4 levels "Biblidinae","Charaxinae",..: 4 4 4 4 4 4 4 4 4 4 ...
+ Tribe          : Factor w/ 16 levels "Ageroniini","Anaeini",..: 13 13 13 13 13 13 4 4 4 8 ...
+ Genus          : Factor w/ 86 levels "Amphidecta","Antirrhea",..: 49 49 49 49 49 49 8 25 51 45 ...
+ Species        : Factor w/ 279 levels "Amphidecta_pignerator",..: 154 160 155 158 156 157 16 73 166 134 ...
+ Species.Authors: Factor w/ 124 levels "H\xfcbner, [1822]",..: 24 22 45 40 50 36 67 46 99 22 ...
+ X              : logi  NA NA NA NA NA NA ...
+ X.1            : logi  NA NA NA NA NA NA ...
+ X.2            : logi  NA NA NA NA NA NA ...
+ X.3            : logi  NA NA NA NA NA NA ...
+ X.4            : logi  NA NA NA NA NA NA ...
+ X.5            : logi  NA NA NA NA NA NA ...
+ X...           : Factor w/ 4 levels "",",",",,",",,,": 3 3 3 3 3 3 3 3 3 3 .
+
+head(species)
+sites_ID   Class       Order      Family Subfamily    Tribe  Genus            Species     Species.Authors  X X.1 X.2 X.3 X.4 X.5 X...
+1  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho        Morpho_aega (H\xfcbner, [1822]) NA  NA  NA  NA  NA  NA   ,,
+2  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho      Morpho_portis (H\xfcbner, [1821]) NA  NA  NA  NA  NA  NA   ,,
+3  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho    Morpho_anaxibia     (Esper, [1801]) NA  NA  NA  NA  NA  NA   ,,
+4  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho    Morpho_hercules      (Dalman, 1823) NA  NA  NA  NA  NA  NA   ,,
+5  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho Morpho_epistrophus   (Fabricius, 1796) NA  NA  NA  NA  NA  NA   ,,
+6  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho     Morpho_helenor      (Cramer, 1776) NA  NA  NA  NA  NA  NA   ,,
+
+str(sites)
+'data.frame':	122 obs. of  17 variables:
+   sites_ID      : Factor w/ 122 levels "bor1001","bor1002",..: 1 2 3 4 5 6 7 8 9 10 ...
+ Country       : Factor w/ 2 levels "Argentina","Brazil": 2 2 2 2 2 2 2 2 2 2 ...
+ State         : Factor w/ 15 levels "ALAGOAS","BAHIA",..: 13 13 13 9 9 9 9 9 13 9 ...
+ Municipality  : Factor w/ 112 levels "AGROLANDIA","ALFENAS",..: 59 97 92 30 56 41 60 33 82 9 ...
+ Study.Location: Factor w/ 122 levels "Sert\xe3o da Praia Dura",..: 60 42 106 28 57 44 61 35 91 108 ...
+ Latitude      : num  -29.6 -29.4 -29.7 -25.3 -23.3 ...
+ Longitude     : num  -50.3 -50.4 -53.8 -49.4 -51.2 ...
+ Precision     : Factor w/ 10 levels "10","10000","120",..: 6 7 8 5 10 1 1 1 1 1 ...
+ Reserve_Area  : num  NA 1615 NA NA NA ...
+ Altitude      : Factor w/ 106 levels "0-15","10-200",..: 7 97 50 94 56 99 55 33 23 10 ...
+ Altitude1km   : int  305 917 99 956 571 936 442 280 139 803 ...
+ A_mean_temp   : num  18.7 14.9 19.9 16.7 20.6 ...
+ A_rainfall    : int  1568 2083 1665 1641 1598 1691 1256 1202 1763 1431 ...
+ Olsong200r    : Factor w/ 2 levels "Atlantic Forests",..: 1 1 NA 1 1 1 1 1 1 1 ...
+ Olsoneconame  : Factor w/ 13 levels "Alto Parana Atlantic forests",..: 2 2 13 2 1 2 1 1 1 2 ...
+ Ribeirovegtype: Factor w/ 9 levels "Areas das Formacoes Pioneiras",..: 8 3 2 8 5 9 5 5 4 8 ...
+ BSRs.         : Factor w/ 11 levels "Bahia","Bahia,",..: 5 5 6 5 6 5 6 6 6 5 ...
+
+ ### Now we are able to see the butterfly data of 7062 species records obtained from 122 sites
+
+ ### Next we must count the number of records from each site -> this allows us to obtain a measure of the total butterfly alpha-diversity
+ ### To do this, we calculate species richness for each site, then combine this with altitude and bioregion information found in the
+ ### 'sites' data
+ 
+ ### All this information has to be combined into a data frame, ready for the statistical analysis 
+ 
+ ### Here, using table(), we can count the number of records from each site, and then through using data.frame() will transform the data
+ ### into a data frame with the necessary columns needed for the analyses being carried out
+
+
+SpeciesRichness <- table(species$sites_ID)
+
+summary(as.numeric(SpeciesRichness))        ### This generates a summary of the species recorded at each research site ###
+Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+15.00   38.25   53.00   57.89   74.50  121.00 
+
+ButterflyDiversity <- data.frame(
++     SiteID = factor(names(SpeciesRichness)),
++     SpeciesRichness = as.numeric(SpeciesRichness)
++ )
+
+summary(ButterflyDiversity)
+SiteID    SpeciesRichness 
+bor1001:  1   Min.   : 15.00  
+bor1002:  1   1st Qu.: 38.25  
+bor1003:  1   Median : 53.00  
+bor1004:  1   Mean   : 57.89  
+bor1005:  1   3rd Qu.: 74.50  
+bor1006:  1   Max.   :121.00  
+(Other):116                   
+
+### Now we are at a stage where we want to add the information about each site -> this is easily done because the 'siteID' variable is 
+### in the same order in the 'sites' file and the new created data frames
+
+### Now we check that the order is the same by using the all.equal() function
+
+all.equal(sites$sites_ID, ButterflyDiversity$SiteID)
+
+[1] TRUE 
+
+ButterflyDiversity$Olsong200r <- sites$Olsong200r
+ButterflyDiversity$Altitude1km <- sites$Altitude1km
+ButterflyDiversity$Latitude <- sites$Latitude
+ButterflyDiversity$Longitude <- sites$Longitude                ### Here we can see that is is all in the same order
+
+str(ButterflyDiversity)
+'data.frame':	122 obs. of  6 variables:
+ SiteID         : Factor w/ 122 levels "bor1001","bor1002",..: 1 2 3 4 5 6 7 8 9 10 ...
+SpeciesRichness: num  65 58 38 76 22 119 28 60 56 69 ...
+ Olsong200r     : Factor w/ 2 levels "Atlantic Forests",..: 1 1 NA 1 1 1 1 1 1 1 ...
+ Altitude1km    : int  305 917 99 956 571 936 442 280 139 803 ...
+ Latitude       : num  -29.6 -29.4 -29.7 -25.3 -23.3 ...
+ Longitude      : num  -50.3 -50.4 -53.8 -49.4 -51.2 ...
+
+summary(ButterflyDiversity)
+SiteID    SpeciesRichness                           Olsong200r  Altitude1km        Latitude         Longitude     
+bor1001:  1   Min.   : 15.00   Atlantic Forests              :92   Min.   :   1.0   Min.   :-31.814   Min.   :-56.81  
+bor1002:  1   1st Qu.: 38.25   Cerrado Woodlands and Savannas:18   1st Qu.: 147.0   1st Qu.:-23.953   1st Qu.:-49.57  
+bor1003:  1   Median : 53.00   NA's                          :12   Median : 462.0   Median :-22.474   Median :-46.80  
+ bor1004:  1   Mean   : 57.89                                       Mean   : 530.7   Mean   :-21.736   Mean   :-45.91  
+ bor1005:  1   3rd Qu.: 74.50                                       3rd Qu.: 803.0   3rd Qu.:-20.006   3rd Qu.:-42.33  
+ bor1006:  1   Max.   :121.00                                       Max.   :2534.0   Max.   : -5.928   Max.   :-34.86  
+ (Other):116            
+
+
+### Now the results must be checked for any incomplete results ###
+
+which(is.na(ButterflyDiversity$Olsong200r) == TRUE)
+[1]   3  45  86  87  90  91  93 110 111 115 118 119
+
+###  These incomplete results must be removed ###
+
+ButterflyDiversity_final <- ButterflyDiversity[-which(is.na(ButterflyDiversity$Olsong200r) == TRUE),]
+
+summary(ButterflyDiversity_final)
+
+SiteID    SpeciesRichness                           Olsong200r  Altitude 1km        Latitude         Longitude     
+bor1001:  1   Min.   : 15.00   Atlantic Forests              :92   Min.   :   2.0   Min.   :-29.583   Min.   :-56.81  
+bor1002:  1   1st Qu.: 39.50   Cerrado Woodlands and Savannas:18   1st Qu.: 175.8   1st Qu.:-23.414   1st Qu.:-49.12  
+bor1004:  1   Median : 58.00                                       Median : 581.5   Median :-22.452   Median :-46.69  
+bor1005:  1   Mean   : 59.13                                       Mean   : 563.3   Mean   :-21.569   Mean   :-45.75  
+bor1006:  1   3rd Qu.: 76.00                                       3rd Qu.: 836.0   3rd Qu.:-20.019   3rd Qu.:-42.33  
+bor1007:  1   Max.   :121.00                                       Max.   :2534.0   Max.   : -5.928   Max.   :-34.86  
+(Other):104   
+
+### now the data frame is prepared for the statistical analyses we need to carry out 
+
+#########################################################################################################
+
+### In order to investigate if the pattern does differ between the subfamilies of the butterflies, we must calculate the species
+### richness for each 4 subfamilies individually
+### Through using aggregate(), a data frame is given as the output 
+
+SubFamilyRichness <- aggregate(Species ~ Subfamily + sites_ID, data = species, FUN = length)  # FUN stands for 'Function'
+
+### This code doesn't consider sites where no species of a given subfamily was found & gives us ('zero records')
+### This function actually only reports the records for subfamilies recorded at each site 
+### We need to change this by adding 'drop = FALSE'
+
+# however, I suggest you to do the analyses here on the non-zero cases, thus we continue
+# with the 'SubFamilyRichness' dataframe
+# we join it with the spatial information for each site, using the merge() function
+
+SubFamilyRichness2 <- merge(SubFamilyRichness, sites, by = "sites_ID")
+
+str(SubFamilyRichness2)
+'data.frame':	469 obs. of  19 variables:
+   sites_ID      : Factor w/ 122 levels "bor1001","bor1002",..: 1 1 1 1 2 2 2 2 3 3 ...
+Subfamily     : Factor w/ 4 levels "Biblidinae","Charaxinae",..: 1 2 3 4 1 2 3 4 1 2 ...
+Species       : int  17 7 4 37 14 8 2 34 8 7 ...
+Country       : Factor w/ 2 levels "Argentina","Brazil": 2 2 2 2 2 2 2 2 2 2 ...
+State         : Factor w/ 15 levels "ALAGOAS","BAHIA",..: 13 13 13 13 13 13 13 13 13 13 ...
+Municipality  : Factor w/ 112 levels "AGROLANDIA","ALFENAS",..: 59 59 59 59 97 97 97 97 92 92 ...
+Study.Location: Factor w/ 122 levels "Sert\xe3o da Praia Dura",..: 60 60 60 60 42 42 42 42 106 106 ...
+Latitude      : num  -29.6 -29.6 -29.6 -29.6 -29.4 ...
+Longitude     : num  -50.3 -50.3 -50.3 -50.3 -50.4 ...
+Precision     : Factor w/ 10 levels "10","10000","120",..: 6 6 6 6 7 7 7 7 8 8 ...
+Reserve_Area  : num  NA NA NA NA 1615 ...
+Altitude      : Factor w/ 106 levels "0-15","10-200",..: 7 7 7 7 97 97 97 97 50 50 ...
+Altitude1km   : int  305 305 305 305 917 917 917 917 99 99 ...
+A_mean_temp   : num  18.7 18.7 18.7 18.7 14.9 ...
+A_rainfall    : int  1568 1568 1568 1568 2083 2083 2083 2083 1665 1665 ...
+Olsong200r    : Factor w/ 2 levels "Atlantic Forests",..: 1 1 1 1 1 1 1 1 NA NA ...
+Olsoneconame  : Factor w/ 13 levels "Alto Parana Atlantic forests",..: 2 2 2 2 2 2 2 2 13 13 ...
+Ribeirovegtype: Factor w/ 9 levels "Areas das Formacoes Pioneiras",..: 8 8 8 8 3 3 3 3 2 2 ...
+BSRs.         : Factor w/ 11 levels "Bahia","Bahia,",..: 5 5 5 5 5 5 5 5 6 6 ...
+
+
+Summary(SubFamilyRichness2)
+
+sites_ID         Subfamily      Species           Country                  State                   Municipality
+bor1001:  4   Biblidinae :122   Min.   : 1.00   Argentina: 12   SAO PAULO        :143   CAMPINAS            : 16  
+bor1002:  4   Charaxinae :118   1st Qu.: 4.00   Brazil   :457   RIO DE JANEIRO   : 51   UBATUBA             : 10  
+bor1003:  4   Nymphalinae:107   Median :11.00                   RIO GRANDE DO SUL: 50   CACHOEIRAS DE MACACU:  8  
+bor1006:  4   Satyrinae  :122   Mean   :15.06                   BAHIA            : 43   LINHARES            :  8  
+bor1008:  4                     3rd Qu.:22.00                   MINAS GERAIS     : 38   SANTA TERESA        :  8  
+bor1010:  4                     Max.   :69.00                   ESPIRITO SANTO   : 33   TERESOPOLIS         :  8  
+(Other):445                                                     (Other)          :111   (Other)             :411  
+Study.Location                                                              Latitude         Longitude            Precision    Reserve_Area         Altitude    Altitude1km    
+Parque Estadual da Serra do Mar Nucleo Santa Virg\xednia          :  4   Min.   :-31.814   Min.   :-56.81   30         :324   Min.   :     7.4   900    : 18   Min.   :   1.0  
+Mata Santa Tereza and Esta\xe7\xe3o Ecologica de Ribeir\xe3o Preto:  4   1st Qu.:-23.999   1st Qu.:-49.51   Not Precise: 54   1st Qu.:  1250.0   50-100 : 16   1st Qu.: 147.0  
+ARIE P\xe9 de Gigante and Parque Estadual de Vassununga           :  4   Median :-22.455   Median :-46.80   10         : 26   Median :  5566.0   10-200 :  8   Median : 462.0  
+Alfenas                                                           :  4   Mean   :-21.680   Mean   :-45.87   12000      : 18   Mean   : 35693.3   200-450:  8   Mean   : 527.4  
+Araras and Loreto and Fazenda Santa Cruz                          :  4   3rd Qu.:-20.005   3rd Qu.:-42.27   1200       : 16   3rd Qu.: 33800.0   25-90  :  8   3rd Qu.: 803.0  
+Area de Protecao Especial Manancial Mutuca                        :  4   Max.   : -5.928   Max.   :-34.86   120        : 11   Max.   :332000.0   500    :  8   Max.   :2534.0  
+(Other)                                                           :445                                      (Other)    : 20   NA's   :312        (Other):403   NA's   :4       
+A_mean_temp      A_rainfall                            Olsong200r                        Olsoneconame                          Ribeirovegtype                     BSRs.    
+Min.   : 9.39   Min.   : 632   Atlantic Forests              :350   Serra do Mar coastal forests:118   Floresta Ombrofila Densa        :163    Florestas de Interior, :154  
+1st Qu.:18.75   1st Qu.:1277   Cerrado Woodlands and Savannas: 71   Alto Parana Atlantic forests: 84   Floresta Estacional Semidecidual: 76    Serra do Mar,          :102  
+Median :20.39   Median :1430   NA's                          : 48   Cerrado                     : 71   Areas de Tensao Ecologica       : 52    NA,                    : 64  
+ Mean   :20.34   Mean   :1483                                        Bahia coastal forests       : 57   Savana                          : 51    Bahia,                 : 53  
+ 3rd Qu.:22.60   3rd Qu.:1632                                        Araucaria moist forests     : 36   Floresta Ombrofila Mista        : 24    Florestas de Araucaria,: 48  
+ Max.   :25.81   Max.   :2902                                        (Other)                     : 99   (Other)                         : 39    Pernambuco,            : 24  
+ NA's   :8       NA's   :8                                     
+
+### The last step in this section is to remove any records that don't have information regarding the ecoregion
+
+SubFamilyRichness_final <- SubFamilyRichness2[-which(is.na(SubFamilyRichness2$Olsong200r) == TRUE),]
+summary(SubFamilyRichness_final)
+
+sites_ID         Subfamily      Species           Country               State                   Municipality
+ bor1001:  4   Biblidinae :110   Min.   : 1.00   Argentina:  8   SAO PAULO     :139   CAMPINAS            : 16  
+ bor1002:  4   Charaxinae :106   1st Qu.: 4.00   Brazil   :413   RIO DE JANEIRO: 51   UBATUBA             : 10  
+ bor1006:  4   Nymphalinae: 95   Median :12.00                   BAHIA         : 39   CACHOEIRAS DE MACACU:  8  
+ bor1008:  4   Satyrinae  :110   Mean   :15.45                   MINAS GERAIS  : 34   LINHARES            :  8  
+ bor1010:  4                     3rd Qu.:23.00                   ESPIRITO SANTO: 33   SANTA TERESA        :  8  
+ bor1011:  4                     Max.   :69.00                   PARANA        : 33   TERESOPOLIS         :  8  
+ (Other):397                                                     (Other)       : 92   (Other)             :363  
+ Study.Location                                                              Latitude         Longitude            Precision    Reserve_Area         Altitude    Altitude1km    
+ Parque Estadual da Serra do Mar Nucleo Santa Virg\xednia          :  4   Min.   :-29.583   Min.   :-56.81   30         :284   Min.   :     7.4   900    : 18   Min.   :   2.0  
+ Mata Santa Tereza and Esta\xe7\xe3o Ecologica de Ribeir\xe3o Preto:  4   1st Qu.:-23.347   1st Qu.:-49.12   Not Precise: 50   1st Qu.:  1250.0   50-100 : 12   1st Qu.: 175.0  
+ ARIE P\xe9 de Gigante and Parque Estadual de Vassununga           :  4   Median :-22.450   Median :-46.80   10         : 26   Median :  5052.5   200-450:  8   Median : 592.0  
+ Alfenas                                                           :  4   Mean   :-21.499   Mean   :-45.70   12000      : 18   Mean   : 37074.9   500    :  8   Mean   : 561.2  
+ Araras and Loreto and Fazenda Santa Cruz                          :  4   3rd Qu.:-20.010   3rd Qu.:-42.27   1200       : 16   3rd Qu.: 33800.0   60-100 :  8   3rd Qu.: 844.0  
+ Area de Protecao Especial Manancial Mutuca                        :  4   Max.   : -5.928   Max.   :-34.86   120        : 11   Max.   :332000.0   800-900:  8   Max.   :2534.0  
+ (Other)                                                           :397                                      (Other)    : 16   NA's   :280        (Other):359                   
+A_mean_temp      A_rainfall                            Olsong200r                        Olsoneconame                          Ribeirovegtype                     BSRs.    
+Min.   : 9.39   Min.   : 870   Atlantic Forests              :350   Serra do Mar coastal forests:118   Floresta Ombrofila Densa        :159    Florestas de Interior,:142  
+1st Qu.:18.69   1st Qu.:1284   Cerrado Woodlands and Savannas: 71   Alto Parana Atlantic forests: 84   Floresta Estacional Semidecidual: 76    Serra do Mar,          : 98  
+Median :20.48   Median :1431                                        Cerrado                     : 71   Savana                          : 51    Bahia,                 : 53  
+Mean   :20.28   Mean   :1495                                        Bahia coastal forests       : 57   Areas de Tensao Ecologica       : 32    Florestas de Araucaria,: 48  
+3rd Qu.:22.55   3rd Qu.:1641                                        Araucaria moist forests     : 36   Floresta Ombrofila Mista        : 24    NA,                    : 44  
+Max.   :25.81   Max.   :2902                                        Bahia interior forests      : 23   (Other)                         : 35    Pernambuco,            : 20  
+NA's   :4       NA's   :4                                           (Other)                     : 32   NA's                            : 44    (Other)                : 16  
+
+### Using this completed dataframe, now we will run separate analyses for each subfamily -> this allows us to investigate whether the 
+### the same results occur or not.
+
+SubFamilyRichness_final<- split(SubFamilyRichness, SubFamilyRichness$Subfamily)
+
+########################################################
+# 3. Exploratory Analysis - Inspection of the Data 
+########################################################
+
+getwd()
+[1] "C:/Users/2120525/Downloads
+
+setwd("C:/Users/2120525/OneDrive - Swansea University/Year 2/BIO252 CW1 Resit")
+
+species <- read.csv("ATLANTIC_BUTTERFLIES_species.csv", sep = ";", stringsAsFactors = TRUE)
+sites <- read.csv("ATLANTIC_BUTTERFLIES_sites.csv", sep = ";", stringsAsFactors = TRUE)
+
+
+install.packages("psych")
+
+library(psych)
+
+describe(species)
+                               vars    n   mean    sd median trimmed   mad min  max range  skew kurtosis   se
+              sites_ID*           1 7062  58.84 34.97     55   58.28 44.48   1  122   121  0.10    -1.19 0.42
+              Class*              2 7062   1.00  0.00      1    1.00  0.00   1    1     0   NaN      NaN 0.00
+              Order*              3 7062   1.00  0.00      1    1.00  0.00   1    1     0   NaN      NaN 0.00
+              Family*             4 7062   1.00  0.00      1    1.00  0.00   1    1     0   NaN      NaN 0.00
+              Subfamily*          5 7062   2.68  1.36      3    2.73  1.48   1    4     3 -0.20    -1.79 0.02
+              Tribe*              6 7062   9.39  5.83     10    9.61  8.90   1   16    15 -0.11    -1.67 0.07
+              Genus*              7 7062  41.83 23.77     40   41.17 25.20   1   86    85  0.23    -0.90 0.28
+              Species*            8 7062 127.87 77.54    122  125.32 91.92   1  279   278  0.23    -0.96 0.92
+              Species.Authors*    9 7056  48.01 26.41     46   46.10 17.79   1  124   123  0.67     0.54 0.31
+              X                  10    0    NaN    NA     NA     NaN    NA Inf -Inf  -Inf    NA       NA   NA
+              X.1                11    0    NaN    NA     NA     NaN    NA Inf -Inf  -Inf    NA       NA   NA
+              X.2                12    0    NaN    NA     NA     NaN    NA Inf -Inf  -Inf    NA       NA   NA
+              X.3                13    0    NaN    NA     NA     NaN    NA Inf -Inf  -Inf    NA       NA   NA
+              X.4                14    0    NaN    NA     NA     NaN    NA Inf -Inf  -Inf    NA       NA   NA
+              X.5                15    0    NaN    NA     NA     NaN    NA Inf -Inf  -Inf    NA       NA   NA
+              X.6                16    0    NaN    NA     NA     NaN    NA Inf -Inf  -Inf    NA       NA   NA
+
+summary(species)
+sites_ID        Class              Order              Family           Subfamily            Tribe               Genus     
+bor1048: 121   Insecta:7062   Lepidoptera:7062   Nymphalidae:7062   Biblidinae :2335   Satyrini   :2120   Hamadryas   : 580  
+bor1006: 119                                                        Charaxinae :1010   Brassolini : 881   Dynamine    : 362  
+bor1018: 118                                                        Nymphalinae: 268   Anaeini    : 656   Morpho      : 320  
+bor1049: 110                                                        Satyrinae  :3449   Ageroniini : 639   Taygetis    : 299  
+bor1041: 109                                                                           Callicorini: 448   Memphis     : 288  
+bor1093: 109                                                                           Eubagini   : 362   Yphthimoides: 269  
+(Other):6376                                                                           (Other)    :1956   (Other)     :4944  
+Species              Species.Authors    X             X.1            X.2            X.3            X.4         
+Hermeuptychia_hermes    : 120   (Godart, [1824]) : 888   Mode:logical   Mode:logical   Mode:logical   Mode:logical   Mode:logical  
+Hamadryas_amphinome     : 104   (Linnaeus, 1758) : 530   NA's:7062      NA's:7062      NA's:7062      NA's:7062      NA's:7062     
+ Biblis_hyperia          : 101   (Fabricius, 1775): 445                                                                             
+ Morpho_helenor          : 100   (Cramer, 1775)   : 428                                                                             
+ Paryphthimoides_phronius: 100   (Cramer, 1777)   : 235                                                                             
+ Diaethria_clymena       :  99   (Other)          :4530                                                                             
+ (Other)                 :6438   NA's             :   6                                                                             
+X.5            X.6         
+Mode:logical   Mode:logical  
+NA's:7062      NA's:7062   
+
+str(species)
+'data.frame':	7062 obs. of  16 variables:
+  $ sites_ID       : Factor w/ 122 levels "bor1001","bor1002",..: 48 48 48 48 48 48 48 48 48 48 ...
+$ Class          : Factor w/ 1 level "Insecta": 1 1 1 1 1 1 1 1 1 1 ...
+$ Order          : Factor w/ 1 level "Lepidoptera": 1 1 1 1 1 1 1 1 1 1 ...
+$ Family         : Factor w/ 1 level "Nymphalidae": 1 1 1 1 1 1 1 1 1 1 ...
+$ Subfamily      : Factor w/ 4 levels "Biblidinae","Charaxinae",..: 4 4 4 4 4 4 4 4 4 4 ...
+$ Tribe          : Factor w/ 16 levels "Ageroniini","Anaeini",..: 13 13 13 13 13 13 4 4 4 8 ...
+$ Genus          : Factor w/ 86 levels "Amphidecta","Antirrhea",..: 49 49 49 49 49 49 8 25 51 45 ...
+$ Species        : Factor w/ 279 levels "Amphidecta_pignerator",..: 154 160 155 158 156 157 16 73 166 134 ...
+$ Species.Authors: Factor w/ 124 levels "H\xfcbner, [1822]",..: 24 22 45 40 50 36 67 46 99 22 ...
+$ X              : logi  NA NA NA NA NA NA ...
+$ X.1            : logi  NA NA NA NA NA NA ...
+$ X.2            : logi  NA NA NA NA NA NA ...
+$ X.3            : logi  NA NA NA NA NA NA ...
+$ X.4            : logi  NA NA NA NA NA NA ...
+$ X.5            : logi  NA NA NA NA NA NA ...
+$ X.6            : logi  NA NA NA NA NA NA ...
+
+head(species)
+sites_ID   Class       Order      Family Subfamily    Tribe  Genus            Species     Species.Authors  X X.1 X.2 X.3 X.4 X.5 X.6
+1  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho        Morpho_aega (H\xfcbner, [1822]) NA  NA  NA  NA  NA  NA  NA
+2  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho      Morpho_portis (H\xfcbner, [1821]) NA  NA  NA  NA  NA  NA  NA
+3  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho    Morpho_anaxibia     (Esper, [1801]) NA  NA  NA  NA  NA  NA  NA
+4  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho    Morpho_hercules      (Dalman, 1823) NA  NA  NA  NA  NA  NA  NA
+5  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho Morpho_epistrophus   (Fabricius, 1796) NA  NA  NA  NA  NA  NA  NA
+6  bor1048 Insecta Lepidoptera Nymphalidae Satyrinae Morphini Morpho     Morpho_helenor      (Cramer, 1776) NA  NA  NA  NA  NA  NA  NA
+
+describe(sites)
+vars   n     mean       sd  median  trimmed     mad    min       max     range  skew kurtosis       se
+sites_ID*          1 122    61.50    35.36   61.50    61.50   45.22   1.00    122.00    121.00  0.00    -1.23     3.20
+Country*           2 122     1.98     0.16    2.00     2.00    0.00   1.00      2.00      1.00 -6.06    35.06     0.01
+State*             3 122    10.10     4.80   11.00    10.51    5.93   1.00     15.00     14.00 -0.52    -1.22     0.43
+Municipality*      4 122    56.81    33.08   56.50    56.72   43.74   1.00    112.00    111.00  0.02    -1.28     3.00
+Study.Location*    5 122    61.50    35.36   61.50    61.50   45.22   1.00    122.00    121.00  0.00    -1.23     3.20
+Latitude           6 122   -21.74     5.21  -22.47   -22.13    3.57 -31.81     -5.93     25.89  0.83     1.08     0.47
+Longitude          7 122   -45.91     5.02  -46.80   -46.03    5.32 -56.81    -34.86     21.95  0.24    -0.59     0.45
+Precision*         8 122     7.38     2.19    8.00     7.73    0.00   1.00     10.00      9.00 -1.70     2.33     0.20
+Reserve_Area       9  40 35087.31 76224.47 5309.24 15173.44 7798.58   7.38 332000.00 331992.62  3.06     8.78 12052.15
+Altitude*         10 122    54.83    30.70   54.50    55.22   39.29   1.00    106.00    105.00 -0.05    -1.20     2.78
+Altitude1km       11 121   530.68   448.20  462.00   481.07  478.88   1.00   2534.00   2533.00  1.23     2.47    40.75
+A_mean_temp       12 120    20.30     2.82   20.42    20.46    2.83   9.39     25.81     16.42 -0.70     0.91     0.26
+A_rainfall        13 120  1487.06   341.68 1430.50  1457.27  257.97 632.00   2902.00   2270.00  1.13     2.99    31.19
+Olsong200r*       14 110     1.16     0.37    1.00     1.08    0.00   1.00      2.00      1.00  1.79     1.23     0.04
+Olsoneconame*     15 121     6.60     4.08    8.00     6.60    4.45   1.00     13.00     12.00 -0.06    -1.49     0.37
+Ribeirovegtype*   16 106     6.03     2.16    7.00     6.17    2.22   1.00      9.00      8.00 -0.70    -0.40     0.21
+BSRs.*            17 122     6.73     2.81    6.00     6.80    1.48   1.00     11.00     10.00  0.12    -0.67     0.25
+
+summary(sites)
+sites_ID        Country                  State                  Municipality
+ bor1001:  1   Argentina:  3   SAO PAULO        :37   CAMPINAS            :  4  
+ bor1002:  1   Brazil   :119   RIO DE JANEIRO   :13   UBATUBA             :  3  
+ bor1003:  1                   RIO GRANDE DO SUL:13   CACHOEIRAS DE MACACU:  2  
+ bor1004:  1                   BAHIA            :11   LINHARES            :  2  
+ bor1005:  1                   MINAS GERAIS     :10   MIRASSOL            :  2  
+ bor1006:  1                   ESPIRITO SANTO   : 9   SANTA TERESA        :  2  
+ (Other):116                   (Other)          :29   (Other)             :107  
+ Study.Location                                                          
+ Sert\xe3o da Praia Dura                                           :  1  
+ Parque Estadual da Serra do Mar Nucleo Santa Virg\xednia          :  1  
+ Agrolandia                                                        :  1  
+ Parque Estadual Campos do Jord\xe3o                               :  1  
+ Mata Santa Tereza and Esta\xe7\xe3o Ecologica de Ribeir\xe3o Preto:  1  
+ ARIE P\xe9 de Gigante and Parque Estadual de Vassununga           :  1  
+ (Other)                                                           :116  
+    Latitude         Longitude            Precision   Reserve_Area         Altitude  
+ Min.   :-31.814   Min.   :-56.81   30         :84   Min.   :     7.4   900    :  5  
+ 1st Qu.:-23.953   1st Qu.:-49.57   Not Precise:14   1st Qu.:  1107.7   50-100 :  4  
+ Median :-22.474   Median :-46.80   10         : 7   Median :  5309.2   10-200 :  2  
+ Mean   :-21.736   Mean   :-45.91   12000      : 5   Mean   : 35087.3   200-450:  2  
+ 3rd Qu.:-20.006   3rd Qu.:-42.33   1200       : 4   3rd Qu.: 32272.2   25-90  :  2  
+ Max.   : -5.928   Max.   :-34.86   120        : 3   Max.   :332000.0   500    :  2  
+                                    (Other)    : 5   NA's   :82         (Other):105  
+  Altitude1km      A_mean_temp      A_rainfall                            Olsong200r
+ Min.   :   1.0   Min.   : 9.39   Min.   : 632   Atlantic Forests              :92  
+ 1st Qu.: 147.0   1st Qu.:18.74   1st Qu.:1277   Cerrado Woodlands and Savannas:18  
+ Median : 462.0   Median :20.42   Median :1430   NA's                          :12  
+ Mean   : 530.7   Mean   :20.30   Mean   :1487                                      
+ 3rd Qu.: 803.0   3rd Qu.:22.56   3rd Qu.:1634                                      
+ Max.   :2534.0   Max.   :25.81   Max.   :2902                                      
+ NA's   :1        NA's   :2       NA's   :2                                         
+                       Olsoneconame                          Ribeirovegtype
+ Serra do Mar coastal forests:31    Floresta Ombrofila Densa        :43    
+ Alto Parana Atlantic forests:22    Floresta Estacional Semidecidual:20    
+ Cerrado                     :18    Areas de Tensao Ecologica       :13    
+ Bahia coastal forests       :15    Savana                          :13    
+ Araucaria moist forests     :10    Floresta Ombrofila Mista        : 7    
+ (Other)                     :25    (Other)                         :10    
+ NA's                        : 1    NA's                            :16    
+                     BSRs.   
+ Florestas de Interior, :40  
+ Serra do Mar,          :27  
+ NA,                    :16  
+ Bahia,                 :14  
+ Florestas de Araucaria,:13  
+ Pernambuco,            : 6  
+ (Other)                : 6  
+
+head(sites)
+sites_ID Country             State           Municipality                              Study.Location  Latitude Longitude   Precision
+1  bor1001  Brazil RIO GRANDE DO SUL                MAQUINE                                     Maquine -29.58333 -50.26667       13000
+2  bor1002  Brazil RIO GRANDE DO SUL SAO FRANCISCO DE PAULA Floresta Nacional de Sao Francisco de Paula -29.42367 -50.38691        2200
+3  bor1003  Brazil RIO GRANDE DO SUL            SANTA MARIA                                 Santa Maria -29.74751 -53.83820          30
+4  bor1004  Brazil            PARANA               CURITIBA                                    Curitiba -25.30000 -49.36667       12000
+5  bor1005  Brazil            PARANA               LONDRINA                                    Londrina -23.30645 -51.17062 Not Precise
+6  bor1006  Brazil            PARANA             GUARAPUAVA                                  Guarapuava -25.40222 -51.42111          10
+Reserve_Area Altitude Altitude1km A_mean_temp A_rainfall       Olsong200r                 Olsoneconame                   Ribeirovegtype
+1           NA  100-300         305       18.68       1568 Atlantic Forests      Araucaria moist forests         Floresta Ombrofila Mista
+2         1615      900         917       14.94       2083 Atlantic Forests      Araucaria moist forests                           Estepe
+3           NA   50-100          99       19.86       1665             <NA>            Uruguayan savanna        Areas de Tensao Ecologica
+4           NA 850-1000         956       16.69       1641 Atlantic Forests      Araucaria moist forests         Floresta Ombrofila Mista
+5           NA  500-600         571       20.65       1598 Atlantic Forests Alto Parana Atlantic forests Floresta Estacional Semidecidual
+6           NA 900-1200         936       16.40       1691 Atlantic Forests      Araucaria moist forests                           Savana
+BSRs.
+1 Florestas de Araucaria,
+2 Florestas de Araucaria,
+3  Florestas de Interior,
+4 Florestas de Araucaria,
+5  Florestas de Interior,
+6 Florestas de Araucaria,
+
+install.packages("readr")
+library(readr)
+
+install.packages("dplyr")
+library(dplyr)
+
