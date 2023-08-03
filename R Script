@@ -120,10 +120,11 @@ summary(as.numeric(SpeciesRichness))        ### This generates a summary of the 
 Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 15.00   38.25   53.00   57.89   74.50  121.00 
 
-ButterflyDiversity <- data.frame(
-+     SiteID = factor(names(SpeciesRichness)),
-+     SpeciesRichness = as.numeric(SpeciesRichness)
-+ )
+ButterflyDiversity <- data.frame(SiteID <- factor(names(SpeciesRichness)), SpeciesRichness <- as.numeric(SpeciesRichness))
+
+SiteID <-c(site_ID)
+> SpeciesRichness <- c(SpeciesRichness)
+> ButterflyDiversity <- ButterflyDiversity_final(SiteID = factor(SiteID), SpeciesRichness = as.numeric(SpeciesRichness))
 
 summary(ButterflyDiversity)
 SiteID    SpeciesRichness 
@@ -149,6 +150,53 @@ ButterflyDiversity$Altitude1km <- sites$Altitude1km
 ButterflyDiversity$Latitude <- sites$Latitude
 ButterflyDiversity$Longitude <- sites$Longitude                ### Here we can see that is is all in the same order
 
+############################## TRY THIS > all.equal(sites$sites_ID, ButterflyDiversity$SiteID)
+[1] TRUE
+> ButterflyDiversity$Olsong200r <- sites$Olsong200r
+> ButterflyDiversity$Altitude1km <- sites$Altitude1km
+> ButterflyDiversity$Latitude <- sites$Latitude
+> ButterflyDiversity$Longitude <- sites$Longitude
+> lm(ButterflyDiversity$Altitude1km)
+Error in formula.default(object, env = baseenv()) : invalid formula
+> lm(ButterflyDiversity$Altitude1km, ATLANTIC_BUTTERFLIES_sites)
+Error in formula.default(object, env = baseenv()) : invalid formula
+> lm(ButterflyDiversity$Altitude1km ~ ATLANTIC_BUTTERFLIES_sites)
+Error in model.frame.default(formula = ButterflyDiversity$Altitude1km ~  : 
+  invalid type (list) for variable 'ATLANTIC_BUTTERFLIES_sites'
+> colnames(ButterflyDiversity)
+[1] "SiteID....factor.names.SpeciesRichness.."      
+[2] "SpeciesRichness....as.numeric.SpeciesRichness."
+[3] "Olsong200r"                                    
+[4] "Altitude1km"                                   
+[5] "Latitude"                                      
+[6] "Longitude"                                     
+> typeof(ATLANTIC_BUTTERFLIES_sites)
+[1] "list"
+> length(ButterflyDiversity$Altitude1km)
+[1] 122
+> length(ATLANTIC_BUTTERFLIES_sites)
+[1] 17
+> ATLANTIC_BUTTERFLIES_sites <- read.csv(ATLANTIC_BUTTERFLIES_sites)
+Error in read.table(file = file, header = header, sep = sep, quote = quote,  : 
+  'file' must be a character string or connection
+> ATLANTIC_BUTTERFLIES_sites <- read.csv("ATLANTIC_BUTTERFLIES_sites")
+Error in file(file, "rt") : cannot open the connection
+In addition: Warning message:
+In file(file, "rt") :
+  cannot open file 'ATLANTIC_BUTTERFLIES_sites': No such file or directory
+> ATLANTIC_BUTTERFLIES_sites <- read.csv("ATLANTIC_BUTTERFLIES_sites.CSV")
+> merged_data <- merge(ButterflyDiversity, ATLANTIC_BUTTERFLIES_sites, by = "site_name", all.x = TRUE)
+Error in fix.by(by.x, x) : 'by' must specify a uniquely valid column
+> merged_data <- merge(ButterflyDiversity, ATLANTIC_BUTTERFLIES_sites, by = "Altitude1km", all.x = TRUE)
+Error in fix.by(by.y, y) : 'by' must specify a uniquely valid column
+In addition: Warning messages:
+1: In grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  : invalid input 'H�bner, [1822]' in 'utf8towcs'
+2: In grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  : invalid input 'H�bner, [1822]' in 'utf8towcs'
+3: In grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  : invalid input 'H�bner, [1822]' in 'utf8towcs'
+4: In grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y,  : invalid input 'H�bner, [1822]' in 'utf8towcs'
+> merged_data <- merge(ButterflyDiversity, ATLANTIC_BUTTERFLIES_sites, by = "Altitude1km", all.x = TRUE)
+
+###################################
 str(ButterflyDiversity)
 'data.frame':	122 obs. of  6 variables:
  SiteID         : Factor w/ 122 levels "bor1001","bor1002",..: 1 2 3 4 5 6 7 8 9 10 ...
