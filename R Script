@@ -478,3 +478,26 @@ library(readr)
 install.packages("dplyr")
 library(dplyr)
 
+POTENTIAL - run 
+
+my_data <- data.frame(biodiversity = c(...), gradient = c(...))
+
+# Step 2: Explore the data
+summary(my_data)
+plot(my_data$gradient, my_data$biodiversity, xlab = "Gradient", ylab = "Biodiversity")
+
+# Step 3: Fit a linear regression model
+model <- lm(biodiversity ~ gradient, data = my_data)
+
+# Step 4: Visualize the results
+plot(my_data$gradient, my_data$biodiversity, xlab = "Gradient", ylab = "Biodiversity")
+abline(model, col = "red")  # Add the regression line to the plot
+
+# Print the regression summary to see the coefficients and statistical information
+summary(model)
+
+exposure = altitude/elevational gradient
+
+Outcome is biodiversity
+
+Elevational biodiversity gradient is output from model 
